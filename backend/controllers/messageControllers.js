@@ -38,8 +38,13 @@ const sendMessage = asyncHandler(async (req, res) => {
     try {
         var message = await Message.create(newMessage);
 
+        // Note .execPopulate decomissioned as at V6 Mongoose onwards. See https://youtu.be/m5-6A-MQ0Os?list=PLKhlp2qtUcSZsGkxAdgnPcHioRr-4guZf&t=681
         message = await message.populate("sender", "name pic").execPopulate();
+        // Replace with:
+        // message = await message.populate(["sender", "name pic"]);
         message = await message.populate("chat").execPopulate();
+        // Replace with:
+        // message = await message.populate("chat");
         message = await User.populate(message, {
             path: "chat.users",
             select: "name pic email",

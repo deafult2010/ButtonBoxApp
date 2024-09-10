@@ -6,8 +6,6 @@ const chatRoutes = require("./routes/chatRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 const path = require("path");
-const { chats } = require("./data/data");
-const colors = require("colors");
 
 dotenv.config();
 connectDB();
@@ -76,7 +74,7 @@ io.on("connection", (socket) => {
         console.log(user + " Left Room: " + room);
     });
     socket.on("typing", (room) => socket.to(room).emit("typing"));
-    socket.on("stop typing", (room) => socket.to(room).emit("stop typing"));
+    // socket.on("stop typing", (room) => socket.to(room).emit("stop typing"));
 
     socket.on("new message", (newMessageRecieved) => {
         var chat = newMessageRecieved.chat;

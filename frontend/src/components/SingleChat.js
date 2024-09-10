@@ -74,7 +74,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
     const sendMessage = async (event) => {
         if (event.key === "Enter" && newMessage) {
-            socket.emit("stop typing", selectedChat._id);
+            // socket.emit("stop typing", selectedChat._id);
             try {
                 const config = {
                     headers: {
@@ -110,17 +110,28 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         socket = io(ENDPOINT);
         socket.emit("setup", user);
         socket.on("connected", () => setSocketConnected(true));
-        socket.on("typing", () => setIsTyping(true));
-        socket.on("stop typing", () => setIsTyping(false));
+        socket.on("typing", () => {
+            setIsTyping(true)
+            let lastTypingTime2 = new Date().getTime();
+            var timerLength2 = 3000;
+            setTimeout(() => {
+                var timeNow2 = new Date().getTime();
+                var timeDiff2 = timeNow2 - lastTypingTime2;
+                if (timeDiff2 >= timerLength2) {
+                    setIsTyping(false);
+                }
+            }, timerLength2)
+        });
+        // socket.on("stop typing", () => setIsTyping(false));
 
         // eslint-disable-next-line
     }, []);
 
     useEffect(() => {
         fetchMessages();
-        // if (selectedChatCompare?._id !== undefined) {
-        //     socket.emit("leave chat", selectedChatCompare._id, user._id);
-        // }
+        if (selectedChatCompare?._id !== undefined) {
+            socket.emit("leave chat", selectedChatCompare._id, user._id);
+        }
         selectedChatCompare = selectedChat;
         // eslint-disable-next-line
     }, [selectedChat]);
@@ -156,7 +167,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             var timeNow = new Date().getTime();
             var timeDiff = timeNow - lastTypingTime;
             if (timeDiff >= timerLength && typing) {
-                socket.emit("stop typing", selectedChat._id);
+                // socket.emit("stop typing", selectedChat._id);
                 setTyping(false);
             }
         }, timerLength);
