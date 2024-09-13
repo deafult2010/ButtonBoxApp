@@ -108,6 +108,7 @@ function SideDrawer() {
 
             if (!chats.find((c) => c._id === data._id)) setChats([data, ...chats]);
             setSelectedChat(data);
+            //NOTIFICATIONS - Insert axios put req here to update mongodb to remove user._id from messages.readby array.
             setLoadingChat(false);
             onClose();
         } catch (error) {
@@ -161,6 +162,7 @@ function SideDrawer() {
                                     onClick={() => {
                                         setSelectedChat(notif.chat);
                                         setNotification(notification.filter((n) => n !== notif));
+                                        //NOTIFICATIONS - Insert axios put req here to update mongodb to remove user._id from messages.readby array.
                                     }}
                                 >
                                     {notif.chat.isGroupChat
