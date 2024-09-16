@@ -42,7 +42,7 @@ function SideDrawer() {
         setSelectedChat,
         user,
         notification,
-        setNotification,
+        // setNotification,
         chats,
         setChats,
     } = ChatState();
@@ -161,8 +161,7 @@ function SideDrawer() {
                                     key={notif._id}
                                     onClick={() => {
                                         setSelectedChat(notif.chat);
-                                        setNotification(notification.filter((n) => n !== notif));
-                                        //NOTIFICATIONS - Insert axios put req here to update mongodb to remove user._id from messages.readby array.
+                                        //setNotification(notification.filter((n) => n !== notif));
                                     }}
                                 >
                                     {notif.chat.isGroupChat

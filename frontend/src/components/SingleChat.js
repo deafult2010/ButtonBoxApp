@@ -57,8 +57,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             );
             setMessages(data);
             setLoading(false);
-
-            console.log(user._id)
             socket.emit("join chat", selectedChat._id, user._id);
 
         } catch (error) {
@@ -89,6 +87,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                     {
                         content: newMessage,
                         chatId: selectedChat,
+                        userId: user
                     },
                     config
                 );
@@ -104,6 +103,41 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                     position: "bottom",
                 });
             }
+        }
+    };
+
+    const updateNotif = async () => {
+        if (!selectedChat) return;
+        if (!messages || messages.length === 0) return;
+        const config = {
+            headers: {
+                Authorization: `Bearer ${user.token}`,
+            },
+        };
+        const { data } = await axios.get(
+            `/api/message/${messages[0]?.chat?._id}`,
+            config
+        );
+        if (data[0]?.chat?.readBy.includes(user._id)) return;
+        try {
+            const { data2 } = await axios.put(
+                `/api/message`,
+                {
+                    chatId: data[0]?.chat?._id,
+                    userId: user
+                },
+                config
+            );
+            setFetchAgain(!fetchAgain)
+        } catch (error) {
+            toast({
+                title: "Error Occured!",
+                description: error.response.data.message,
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+                position: "bottom",
+            });
         }
     };
 
@@ -133,15 +167,13 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         if (selectedChatCompare?._id !== undefined) {
             socket.emit("leave chat", selectedChatCompare._id, user._id);
         }
+        setIsTyping(false)
         selectedChatCompare = selectedChat;
         // eslint-disable-next-line
     }, [selectedChat]);
 
     useEffect(() => {
         socket.on("message recieved", (newMessageRecieved) => {
-            console.log(newMessageRecieved)
-            console.log(newMessageRecieved.sender._id)
-            console.log(notification)
             if (
                 !selectedChatCompare || // if chat is not selected or doesn't match current chat
                 selectedChatCompare._id !== newMessageRecieved.chat._id
@@ -155,6 +187,11 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             }
         });
     });
+
+    useEffect(() => {
+        updateNotif()
+        // eslint-disable-next-line
+    }, [messages]);
 
     const typingHandler = (e) => {
         setNewMessage(e.target.value);
@@ -194,7 +231,10 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                         <IconButton
                             d={{ base: "flex", md: "none" }}
                             icon={<ArrowBackIcon />}
-                            onClick={() => setSelectedChat("")}
+                            onClick={() => {
+                                setSelectedChat("")
+                                setIsTyping(false)
+                            }}
                         />
                         {messages &&
                             (!selectedChat.isGroupChat ? (

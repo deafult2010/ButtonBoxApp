@@ -66,6 +66,14 @@ const fetchChats = asyncHandler(async (req, res) => {
                     path: "latestMessage.sender",
                     select: "name pic email",
                 });
+                results = await Chat.populate(results, {
+                    path: "latestMessage.chat",
+                    select: "chatName isGroupChat latestMessage readBy users",
+                });
+                results = await User.populate(results, {
+                    path: "latestMessage.chat.users",
+                    select: "name pic email",
+                });
                 res.status(200).send(results);
             });
     } catch (error) {

@@ -22,9 +22,9 @@ const allMessages = asyncHandler(async (req, res) => {
 //@route           POST /api/Message/
 //@access          Protected
 const sendMessage = asyncHandler(async (req, res) => {
-    const { content, chatId } = req.body;
+    const { content, chatId, userId } = req.body;
 
-    if (!content || !chatId) {
+    if (!content || !chatId || !userId) {
         console.log("Invalid data passed into request");
         return res.sendStatus(400);
     }
@@ -50,7 +50,7 @@ const sendMessage = asyncHandler(async (req, res) => {
             select: "name pic email",
         });
 
-        await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message });
+        await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message, readBy: [] });
 
         res.json(message);
     } catch (error) {
@@ -59,4 +59,29 @@ const sendMessage = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { allMessages, sendMessage };
+//@description     Update Notifications readBy array
+//@route           PUT /api/Message
+//@access          Protected
+const readBy = asyncHandler(async (req, res) => {
+    const { chatId, userId } = req.body;
+
+    const updatedReadBy = await Chat.findByIdAndUpdate(
+        chatId,
+        {
+            $push: { readBy: userId }
+
+        },
+        {
+            new: true,
+        }
+    )
+
+    if (!updatedReadBy) {
+        res.status(404);
+        throw new Error("Chat Not Found");
+    } else {
+        res.json(updatedReadBy);
+    }
+});
+
+module.exports = { allMessages, sendMessage, readBy };
